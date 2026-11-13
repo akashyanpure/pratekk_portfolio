@@ -1,0 +1,13 @@
+# Private source material (not published)
+*.docx
+Profile.pdf
+Professional Bearded Man in Navy Suit.png
+temp.txt
+CONTENT.md
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+node_modules/

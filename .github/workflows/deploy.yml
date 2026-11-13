@@ -1,0 +1,62 @@
+name: Deploy site to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sanity check
+        run: |
+          set -e
+          required="
+            site/index.html
+            site/css/style.css
+            site/js/main.js
+            site/js/world.js
+            site/js/lab.js
+            site/js/ai-demo.js
+            site/fonts/inter-latin-wght.woff2
+            site/fonts/fraunces-latin-wght.woff2
+            site/fonts/fraunces-latin-wght-italic.woff2
+            site/fonts/jetbrains-mono-latin-wght.woff2
+            site/assets/pratekk-arvinnd-dekaate.jpg
+            site/assets/og-image.jpg
+            site/assets/Pratekk-Arvinnd-Dekaate-CV.pdf
+            site/assets/favicon.svg
+          "
+          for f in $required; do
+            test -s "$f" || { echo "::error::Missing or empty: $f"; exit 1; }
+          done
+          for f in site/js/*.js; do node --check "$f"; done
+          echo "All required files present and JS syntax OK."
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
